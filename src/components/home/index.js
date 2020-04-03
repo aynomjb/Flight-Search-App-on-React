@@ -8,18 +8,26 @@ class Home extends Component {
         this.state = {
             source:'',
             destination:'',
-            noOfSeats: 1
+            noOfSeats: 1,
+            errors: {}
         }
     }
 
     handleInputChange(e) {
         let state = this.state;
         state[e.target.name] = e.target.value;
+        state.errors[e.target.name] = false;
         this.setState(state);
     }
     handleSubmit(e) {
         e.preventDefault();
         if(this.state.source&&this.state.destination&&this.state.noOfSeats) history.push(`flights?source=${this.state.source}&desti=${this.state.destination}&no=${this.state.noOfSeats}`);
+        else {
+            let state = this.state;
+            state.errors.source = this.state.source == ''?true:false;
+            state.errors.destination = this.state.destination == ''?true:false;
+            this.setState(state);
+        }
     }
     
     render() {
@@ -45,9 +53,7 @@ class Home extends Component {
                                         <Card style={{background: '#eaf5ff', border: 'none', padding:'17px', borderRadius: '10px'}}>
                                             <Form.Group controlId="formBasicEmail">
                                                 <Form.Label style={{color:'#008cff'}}>FROM</Form.Label>
-                                                <Form.Control type="text" placeholder="Enter Source"  value={this.state.source} name={"source"} onChange={e=>this.handleInputChange(e)}/>
-                                                <Form.Text className="text-muted">
-                                                </Form.Text>
+                                                <Form.Control type="text" placeholder="Enter Source" value={this.state.source} name={"source"} onChange={e=>this.handleInputChange(e)} isInvalid={this.state.errors.source}/>
                                             </Form.Group>
                                         </Card>
                                         
@@ -56,9 +62,7 @@ class Home extends Component {
                                         <Card style={{background: '#eaf5ff', border: 'none', padding:'17px', borderRadius: '10px'}}>
                                             <Form.Group controlId="formBasicEmail">
                                                 <Form.Label style={{color:'#008cff'}}>TO</Form.Label>
-                                                <Form.Control type="text" placeholder="Enter Destinantion" value={this.state.destination} name={"destination"} onChange={e=>this.handleInputChange(e)}/>
-                                                <Form.Text className="text-muted">
-                                                </Form.Text>
+                                                <Form.Control type="text" placeholder="Enter Destinantion" value={this.state.destination} name={"destination"} onChange={e=>this.handleInputChange(e)} isInvalid={this.state.errors.destination}/>
                                             </Form.Group>
                                         </Card>
                                     </Col>
