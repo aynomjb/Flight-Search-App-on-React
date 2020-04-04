@@ -29,8 +29,49 @@ const flightReducer = (state , action) => {
 }
 
 const fiterFlights = (allFlights, query) => {
-	return allFlights
+	console.log(query)
+
+	//Do base search
+	let searchedFlights = allFlights
 	.filter(flight => flight['From'].toLowerCase() == query.source.toLowerCase() && flight['To'].toLowerCase() == query.desti.toLowerCase() && flight['Seats Available'] >= query.no);
+
+	//Do Sort
+	searchedFlights = doSortBy(searchedFlights, query.sort.type, query.sort.val);
+	return searchedFlights;
 }
+
+const doSortBy = (flights, type, val) => {
+	return flights.sort((a,b) => {
+		if(type == 'Price') {
+			if(val == 'low') return a[type] - b[type];
+			else return b[type] - a[type];
+		}
+		else if(type == 'Duration') {
+			if(val == 'low') return parseDuration(a[type]) - parseDuration(b[type]);
+			else return parseDuration(b[type]) - parseDuration(a[type]);
+		}
+		else if(type == 'Departure' || 'Arrival') {
+			if(val == 'low') return new Date(Date.parse(`2020/04/04 ${a[type]}`)) - new Date(Date.parse(`2020/04/04 ${b[type]}`));
+			else return new Date(Date.parse(`2020/04/04 ${b[type]}`)) - new Date(Date.parse(`2020/04/04 ${a[type]}`));
+		}
+	})
+}
+
+const parseDuration = (duration) => {
+	duration = duration.toLowerCase()
+	if(duration.includes('hours')&&duration.includes('mins')) {
+		let splited = duration.split('hours');
+		return (splited[0].trim()* 60) + (splited[1].split('mins')[0].trim()/1);
+	}
+	else if(duration.includes('hours')) {
+		return duration.split('hours')[0].trim()*60;
+	}
+	else if(duration.includes('mins')) {
+		return duration.split('mins')[0].trim();
+	}
+	return 0;
+}
+
+
 
 export default flightReducer;
