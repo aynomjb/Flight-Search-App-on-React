@@ -204,7 +204,7 @@ class Flights extends Component {
                                                                         sort['name'] == this.state.searchBy.sort.type && order['order'] == this.state.searchBy.sort.val?'text-primary':'text-muted'
                                                                     }`}
                                                                     >
-                                                                        {order['name']}
+                                                                       <span style={{cursor: "pointer"}}>{order['name']}</span>
                                                                     </Col>
                                                                 </React.Fragment>
                                                             })
