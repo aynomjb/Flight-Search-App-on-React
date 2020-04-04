@@ -5,26 +5,36 @@ import {getFlights, requestFlightsSuccess} from '../../redux/flights/actions'
 import queryString from 'query-string'
 import {Form, Button, Container, Row, Col, Card, OverlayTrigger, Popover} from 'react-bootstrap'
 import { IoMdArrowBack} from "react-icons/io";
-import {MdTimer, MdFlightTakeoff, MdFlightLand} from "react-icons/md";
+import {MdTimer, MdFlightTakeoff, MdFlightLand, MdEventSeat, MdFlight} from "react-icons/md";
 import { FaFilter, FaSort, FaRupeeSign} from "react-icons/fa";
 
-const filterBy = {
-    'Price': {
+const filterBy = [
+    {
+        name: 'Price',
+        symbol: FaRupeeSign,
         type: 'slider'
     },
-    'Duration': {
+    {
+        name: 'Duration',
+        symbol: MdTimer,
         type: 'select'
     },
-    'Airline': {
-        type: 'multiselect'
+    {
+        name: 'Airline',
+        symbol: MdFlight,
+        type: 'select'
     },
-    'Departure': {
-        type: 'multiselect'
+    {
+        name: 'Departure',
+        symbol: MdFlightTakeoff,
+        type: 'select'
     },
-    'Arrival': {
-        type: 'multiselect'
+    {
+        name: 'Arrival',
+        symbol: MdFlightLand,
+        type: 'select'
     }
-}
+]
 
 const sortBy = [
     {
@@ -82,6 +92,34 @@ const sortBy = [
                 order: 'high'
             }
         ]
+    },
+    {
+        name: 'Seats Available',
+        symbol: MdEventSeat,
+        options: [
+            {
+                name: 'Low to High',
+                order: 'low',
+            },
+            {
+                name: 'High to Low',
+                order: 'high'
+            }
+        ]
+    },
+    {
+        name: 'Airline',
+        symbol: MdFlight,
+        options: [
+            {
+                name: 'A to Z',
+                order: 'low',
+            },
+            {
+                name: 'Z to A',
+                order: 'high'
+            }
+        ]
     }
 ]
 
@@ -96,11 +134,13 @@ class Flights extends Component {
             },
             showPopoverFilter: false,
             showPopoverSort: false,
-            showFlights: true
+            showFlights: true,
+            appliedsort:{}
         }
     }
 
     componentDidMount() {
+        window.scrollTo(0,0);
         this.setState({searchBy:{...queryString.parse(this.props.location.search),...{sort: {}}}}, () => this.props.getFlights(this.state.searchBy));
     }
 
@@ -109,7 +149,12 @@ class Flights extends Component {
     }
 
     toggleFlightList() {
-        this.setState({showFlights: this.state.showPopoverFilter || this.state.showPopoverSort? false:true})
+        this.setState({showFlights: this.state.showPopoverFilter || this.state.showPopoverSort? false:true}, () => {
+            let state = this.state;
+            state.searchBy.sort = this.state.appliedsort;
+            this.setState(state,()=>console.log(this.state))
+        })
+
     }
 
     handleCustomSort(type, val) {
@@ -119,9 +164,12 @@ class Flights extends Component {
     }
 
     applySort() {
-        this.setState({showPopoverFilter: false, showPopoverSort: false}, () => this.toggleFlightList());
+        this.setState({showPopoverFilter: false, showPopoverSort: false, appliedsort: this.state.searchBy.sort}, () => this.toggleFlightList());
         this.props.getFlights(this.state.searchBy);
-        
+    }
+
+    applyFilter() {
+        this.setState({showPopoverFilter: false, showPopoverSort: false}, () => this.toggleFlightList());
     }
 
     render() {
@@ -131,7 +179,10 @@ class Flights extends Component {
                 <Container style={{position: 'fixed', zIndex: 999}}>
                     <Row style={{
                         background:'white',
-                        width: '100vw'
+                        width: '100vw',
+                        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                        paddingTop: '10px',
+                        paddingBottom: '10px'
                     }}>
                         <Col xs={2} style={{alignItems:'center',display:'flex', fontSize: '30px'}}>
                             <span onClick={()=>{
@@ -142,12 +193,12 @@ class Flights extends Component {
                         </Col>
                         <Col xs={7} style={{padding:"10px", alignItems:'center',display:'flex'}}>
                             <div>
-                            <h6>
-                                {this.state.searchBy.source.toUpperCase()} - {this.state.searchBy.desti.toUpperCase()}
-                            </h6>
-                            <p>
-                                {this.state.searchBy.no} Traveller
-                            </p>
+                                <div>
+                                    {this.state.searchBy.source.toUpperCase()} - {this.state.searchBy.desti.toUpperCase()}
+                                </div>
+                                <div className={'text-muted'} style={{fontSize: '13px'}}>
+                                    {this.state.searchBy.no} Traveller
+                                </div>
                             </div>
                         </Col>
                         <Col xs={1} style={{alignItems:'center',display:'flex'}}>
@@ -171,51 +222,54 @@ class Flights extends Component {
                             background:'white',
                             width: '100vw'
                         }}>
-                            <Col xs={12}>
+                            <Col xs={12} style={{boxShadow: '0 8px 6px -6px rgba(0, 0, 0, 0.2)', paddingLeft: '65px'}}>
                                <h5>Sort by</h5>
                             </Col>
-                            {
-                                sortBy.map((sort, s) => {
-                                  return <React.Fragment key={s}>
-                                       <Col xs={12} style={{borderBottom: '1px solid grey', padding: '10px'}}>
-                                            <Row>
-                                                <Col xs={7} style={{paddingLeft: '40px'}}
-                                                className={`${
-                                                    sort['name'] == this.state.searchBy.sort.type?'text-primary':''
-                                                }`}
-                                                >
-                                                    {
-                                                        React.createElement(sort['symbol'])
-                                                    }
-                                                    &nbsp;{sort['name']}
-                                                </Col>
-                                                <Col xs={5}>
-                                                    <Row>
+                            <Col style={{height: '60vh', overflowY: 'scroll'}}>
+                                {
+                                    sortBy.map((sort, s) => {
+                                    return <React.Fragment key={s}>
+                                        <Col xs={12} style={{borderBottom: '1px solid grey', padding: '10px', paddingTop: '20px'}}>
+                                                <Row>
+                                                    <Col xs={7} style={{paddingLeft: '30px'}}
+                                                    className={`${
+                                                        sort['name'] == this.state.searchBy.sort.type?'text-primary':''
+                                                    }`}
+                                                    >
                                                         {
-                                                            sort.options.map((order, o) => {
-                                                                return <React.Fragment key={o}>
-                                                                    <Col xs={12} style={{ fontSize: '13px', paddingBottom: '10px',paddingRight:'50px', textAlign:'right'}} 
-                                                                    onClick={
-                                                                        () => {
-                                                                            this.handleCustomSort(sort['name'],order['order'])
-                                                                        }
-                                                                    }
-                                                                    className={`${
-                                                                        sort['name'] == this.state.searchBy.sort.type && order['order'] == this.state.searchBy.sort.val?'text-primary':'text-muted'
-                                                                    }`}
-                                                                    >
-                                                                       <span style={{cursor: "pointer"}}>{order['name']}</span>
-                                                                    </Col>
-                                                                </React.Fragment>
-                                                            })
+                                                            React.createElement(sort['symbol'])
                                                         }
-                                                    </Row>
-                                                </Col>
-                                            </Row>
-                                        </Col>
-                                  </React.Fragment>
-                                })
-                            }
+                                                        &nbsp;{sort['name']}
+                                                    </Col>
+                                                    <Col xs={5}>
+                                                        <Row>
+                                                            {
+                                                                sort.options.map((order, o) => {
+                                                                    return <React.Fragment key={o}>
+                                                                        <Col xs={12} style={{ fontSize: '13px', paddingBottom: '10px',paddingRight:'30px', textAlign:'right'}} 
+                                                                        onClick={
+                                                                            () => {
+                                                                                this.handleCustomSort(sort['name'],order['order'])
+                                                                            }
+                                                                        }
+                                                                        className={`${
+                                                                            sort['name'] == this.state.searchBy.sort.type && order['order'] == this.state.searchBy.sort.val?'text-primary':'text-muted'
+                                                                        }`}
+                                                                        >
+                                                                        <span style={{cursor: "pointer"}}>{order['name']}</span>
+                                                                        </Col>
+                                                                    </React.Fragment>
+                                                                })
+                                                            }
+                                                        </Row>
+                                                    </Col>
+                                                </Row>
+                                            </Col>
+                                    </React.Fragment>
+                                    })
+                                }
+                            </Col>
+                            
                             <Col xs={12} style={{paddingTop:'20px', paddingBottom: '20px'}}>
                                 <Button variant="primary" onClick={() => {
                                     this.applySort();
@@ -223,6 +277,7 @@ class Flights extends Component {
                                     APPLY
                                 </Button> 
                             </Col>
+                             
                         </Row>
                     }
                     {
@@ -231,9 +286,18 @@ class Flights extends Component {
                             background:'white',
                             width: '100vw'
                         }}>
-                            <Col xs={12}>
+                            <Col xs={12} style={{boxShadow: '0 8px 6px -6px rgba(0, 0, 0, 0.2)', paddingLeft: '65px'}}>
                                 <h5>Filter by</h5>
+                            </Col>
+                            <Col style={{height: '60vh', overflowY: 'scroll'}}>
                                 under construction
+                            </Col>
+                            <Col xs={12} style={{paddingTop:'20px', paddingBottom: '20px'}}>
+                                <Button variant="primary" onClick={() => {
+                                    this.applyFilter();
+                                }} block>
+                                    APPLY
+                                </Button> 
                             </Col>
                         </Row>
                     }
@@ -253,7 +317,7 @@ class Flights extends Component {
                                                     <Col xs={3}><h6 style={{fontSize: '13px'}}>{flight['Departure']}</h6>
                                                     <p style={{fontSize: '11px'}} className={'text-muted'}>{flight['From']}</p>
                                                     </Col>
-                                                    <Col xs={3} style={{alignItems:'center',display:'flex', fontSize:'12px'}}><p>{flight['Duration']}</p></Col>
+                                                    <Col xs={3} style={{alignItems:'center',display:'flex', fontSize:'11px'}}><p>{flight['Duration']}</p></Col>
                                                     <Col xs={3}><h6 style={{fontSize: '13px'}}>{flight['Arrival']}</h6>
                                                     <p style={{fontSize: '11px'}} className={'text-muted'}>{flight['To']}</p>
                                                     </Col>

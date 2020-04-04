@@ -6,8 +6,8 @@ class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            source:'',
-            destination:'',
+            source:'Delhi',
+            destination:'Chennai',
             noOfSeats: 1,
             errors: {}
         }
@@ -26,6 +26,7 @@ class Home extends Component {
             let state = this.state;
             state.errors.source = this.state.source == ''?true:false;
             state.errors.destination = this.state.destination == ''?true:false;
+            state.errors.noOfSeats = this.state.noOfSeats == ''?true:false;
             this.setState(state);
         }
     }
@@ -70,7 +71,7 @@ class Home extends Component {
                                         <Card style={{background: '#eaf5ff', border: 'none', padding:'17px', borderRadius: '10px'}}>
                                             <Form.Group controlId="formBasicEmail">
                                                 <Form.Label style={{color:'#008cff'}}>SEATS</Form.Label>
-                                                <Form.Control type="number" value={this.state.noOfSeats} name={"noOfSeats"} onChange={e=>this.handleInputChange(e)}/>
+                                                <Form.Control type="number" value={this.state.noOfSeats} name={"noOfSeats"} onChange={e=>this.handleInputChange(e)} isInvalid={this.state.errors.noOfSeats}/>
                                                 <Form.Text className="text-muted">
                                                 </Form.Text>
                                             </Form.Group>

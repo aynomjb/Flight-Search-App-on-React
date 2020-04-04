@@ -29,7 +29,6 @@ const flightReducer = (state , action) => {
 }
 
 const fiterFlights = (allFlights, query) => {
-	console.log(query)
 
 	//Do base search
 	let searchedFlights = allFlights
@@ -42,9 +41,19 @@ const fiterFlights = (allFlights, query) => {
 
 const doSortBy = (flights, type, val) => {
 	return flights.sort((a,b) => {
-		if(type == 'Price') {
+		if(type == 'Price' || type == 'Seats Available') {
 			if(val == 'low') return a[type] - b[type];
 			else return b[type] - a[type];
+		}
+		else if(type == 'Airline') {
+			if(val == 'low') {
+				return a[type] - b[type];
+			}
+			else {
+				if(a[type] > b[type]) return -1;
+				if(a[type] < b[type]) return 1;
+				return 0;
+			}
 		}
 		else if(type == 'Duration') {
 			if(val == 'low') return parseDuration(a[type]) - parseDuration(b[type]);
